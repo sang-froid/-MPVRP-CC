@@ -1,0 +1,12 @@
+# Solution pour l'instance: MPVRP_S_001_s9_d1_p2
+# Générée le: 2026-01-28 12:12:55
+# Coût total: inf
+# Nombre de routes: 0
+# Temps limite utilisé: 30.0s
+#
+# Format: RouteID VehiculeID GarageID DepotID ProduitInit Charge
+#         Liste des livraisons: StationID(Produit=Quantité,...)
+#
+#
+# RÉSUMÉ
+# Demande totale: 34443
