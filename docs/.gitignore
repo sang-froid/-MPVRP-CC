@@ -12,6 +12,7 @@
 *.nav
 *.snm
 *.vrb
+*.mtc*
 
 # --- Bibliography ---
 *.bbl
@@ -30,6 +31,7 @@
 *.acn
 *.acr
 *.alg
+*.nlo
 
 # --- Temporary / backup files ---
 *~
