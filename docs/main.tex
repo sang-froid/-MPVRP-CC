@@ -1,132 +1,109 @@
-\documentclass{ifri}
-\usepackage{titletoc}
-\setlength{\glsdescwidth}{0.65\textwidth}
+\documentclass[11pt,a4paper]{report}
 
-\typeMemoire{Master en Informatique}
-\optionFormation{GL && SI && SIRI}
-\etudiant{Prenom \textbf{Nom}}
-\titreDuMemoire{Multi-Product Vehicle Routing Problem with Changeover Cost}
+% encodage & langue
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
 
-\dateSoutenance{-}
-\anneeScolaire{2025-2026}
-
-\encadrants{Prenom \textbf{Nom}}
-
-\jurys{%
-\begin{tabular}{llll}
-	Nom et prénoms du président & Grade & Entité & Président \\
-	Nom et prénoms de l'examinateur & Grade & Entité & Examinateur \\
-	Nom et prénoms du rapporteur & Grade & Entité & Rapporteur \\
-\end{tabular}	
-}
-
-\hypersetup{
- pdftitle={MPVRP-CC},
- pdfauthor={--},
- pdfsubject={Rapport de projet},
- pdfkeywords={VRP, MPVRP, Changeover, optimisation} 
-}
-
-\color{bookColor}
-
-% importation du glossaire
-\loadglsentries{glossaire_reduit}
-
-\begin{document}
-
-% =====================
-% Page de garde
-% =====================
-\pageDeGarde
-\pagecolor{white}
-\selectlanguage{french}
-
-
-% =====================
-% Sommaire
-% =====================
-\pagenumbering{roman}
-\setcounter{tocdepth}{0}
-\startlist{toc}
-\printlist{toc}{}{\chapter*{Sommaire}}
-\setcounter{tocdepth}{5}
-
-
-% =====================
-% Résumé
-% =====================
-\include{resume}
-\newpage
-
-
-% =====================
-% Liste des figures
-% =====================
-\listoffigures
-\newpage
-
-
-% =====================
-% Liste des tableaux
-% =====================
-\listoftables
-\newpage
-
-
-% =====================
-% Liste des algos
-% =====================
-\selectlanguage{french}
-\listofalgorithmes
-\newpage
-
-
-% =====================
-% Liste des sigles / acronymes
-% =====================
-\setglossarystyle{altlist}
-\printglossary[title=Liste des acronymes, toctitle=Liste des acronymes, type=\acronymtype]
-\newpage
-
-
-% =====================
-% Chapitres principaux
-% =====================
-\pagenumbering{arabic}
-\setcounter{page}{1}
-
-\include{introduction}
-\selectlanguage{french}
+% graphisme / maths / utilitaires
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\graphicspath{{images/}} % dossier des images
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
 \fancyhead[L]{\tiny \leftmark}
 \fancyhead[R]{\scriptsize \rightmark}
 \fancyfoot[C]{\thepage}
 
-\chapter{Présentation du problème}\label{chap:1}
-\input{1/presentation}
- 
-\chapter{Modélisation du problème}\label{chap:2}
-\input{2/modelisation}
- 
-\chapter{Résolution}\label{chap:3}
-\input{3/resolution}
+% style des titres de chapitre
+\usepackage[Lenny]{fncychap}
 
+% listes, tableaux, etc.
+\usepackage{tocloft}
+\setlength{\cftbeforechapskip}{6pt}
+
+% glossaire
+\usepackage[acronym,toc]{glossaries}
+\makeglossaries
+
+% commandes utiles
+\newcommand{\ReportTitle}{Multi-Product Vehicle Routing Problem with Changeover Cost}
+\newcommand{\University}{IFRI - UAC}
+\newcommand{\Year}{2025--2026}
+
+% =====================
+\begin{document}
+% =====================
+
+% ===== page de garde simple =====
+\begin{titlepage}
+  \begin{center}
+    {\Large \textbf{Rapport de projet — Master}}\\[2em]
+
+    {\LARGE \textbf{\ReportTitle}}\\[2em]
+
+    {\large Présenté par :}\\[0.6em]
+    \begin{tabular}{ll}
+      Irené LOKOSSOU   & 10\,\% \\
+      Juste TOSSOU     & 10\,\% \\
+      Méschac HOUESSOU & 10\,\% \\
+      Samuel AKABASSI  & 10\,\% \\
+      Mavic PATINVOH   & 10\,\% \\
+      Omella           & 10\,\%
+    \end{tabular}
+
+    \vfill
+
+    Encadrant : Dr Ratheil HOUNDJI\\[1em]
+
+    \University\\[0.5em]
+    Année académique : \Year
+
+  \end{center}
+\end{titlepage}
+
+% ===== sommaire & préliminaires =====
+\pagenumbering{roman}
+\setcounter{tocdepth}{2}
+\tableofcontents
+\cleardoublepage
+
+% résumé
+\input{resume.tex}
+\cleardoublepage
+
+% listes
+\listoffigures
+\cleardoublepage
+\listoftables
+\cleardoublepage
+
+% sigles/glossaire (si utilisé)
+\printglossary[type=\acronymtype,title=Liste des acronymes,toctitle=Liste des acronymes]
+\cleardoublepage
+
+% ===== chapitres =====
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\include{introduction}
+\setcounter{chapter}{0}
+\include{presentation}
+\include{modelisation}
+\include{resolution}
 \include{conclusion}
-\lhead[]{} \rhead[]{} \chead[]{}
 
-
-% =====================
-% Bibliographie
-% =====================
+% ===== bibliographie =====
 \addcontentsline{toc}{chapter}{Bibliographie}
 \bibliographystyle{abbrv}
 \bibliography{biblio}
-
-
-% =====================
-% Table des matières
-% =====================
-\newpage
-\tableofcontents
-
 
 \end{document}
