@@ -823,7 +823,7 @@ def main():
         try:
             temps_limite = float(sys.argv[3])
         except ValueError:
-            print(f"⚠️ Temps limite invalide, utilisation de la valeur par défaut: 30s")
+            print(f" Temps limite invalide, utilisation de la valeur par défaut: 30s")
     
     # Affichage de l'en-tête
     print("=" * 70)
@@ -838,7 +838,7 @@ def main():
     # ÉTAPE 1: CHARGEMENT DE L'INSTANCE
     # =========================================================================
     
-    print("\n📁 CHARGEMENT DE L'INSTANCE")
+    print("\n CHARGEMENT DE L'INSTANCE")
     print("-" * 40)
     
     try:
@@ -850,14 +850,14 @@ def main():
         print(f"  Dépôts: {inst.D}")
         print(f"  Garages: {inst.G}")
     except Exception as e:
-        print(f"❌ Erreur lors du chargement de l'instance: {e}")
+        print(f" Erreur lors du chargement de l'instance: {e}")
         sys.exit(1)
     
     # =========================================================================
     # ÉTAPE 2: ANALYSE DE FAISABILITÉ
     # =========================================================================
     
-    print("\n📊 ANALYSE DE FAISABILITÉ")
+    print("\n ANALYSE DE FAISABILITÉ")
     print("-" * 40)
     
     # Calculer la demande totale
@@ -872,7 +872,7 @@ def main():
     print(f"  Capacité totale: {capacite_totale} unités")
     
     if demande_totale > capacite_totale:
-        print(f"  ⚠️ ATTENTION: Demande > Capacité")
+        print(f"  ATTENTION: Demande > Capacité")
         print(f"  Ratio: {demande_totale/capacite_totale:.2f}")
         print(f"  Le solveur va essayer de trouver une solution, mais c'est impossible")
     else:
@@ -884,7 +884,7 @@ def main():
     # ÉTAPE 3: RÉSOLUTION AVEC OR-TOOLS
     # =========================================================================
     
-    print("\n🧠 RÉSOLUTION AVEC OR-TOOLS CP-SAT")
+    print("\n RÉSOLUTION AVEC OR-TOOLS CP-SAT")
     print("-" * 40)
     
     routes, cout_total = solve_with_ortools(inst, temps_limite)
@@ -901,7 +901,7 @@ def main():
         try:
             visualiser_solution(inst, routes, visu_file)
         except Exception as e:
-            print(f"\n⚠️ Erreur lors de la création de la visualisation: {e}")
+            print(f"\n Erreur lors de la création de la visualisation: {e}")
             print("  La visualisation nécessite matplotlib. Installez-le avec:")
             print("  pip install matplotlib")
     
@@ -909,7 +909,7 @@ def main():
     # ÉTAPE 5: SAUVEGARDE DE LA SOLUTION
     # =========================================================================
     
-    print("\n💾 SAUVEGARDE DE LA SOLUTION")
+    print("\n SAUVEGARDE DE LA SOLUTION")
     print("-" * 40)
     
     try:
@@ -955,7 +955,7 @@ def main():
         print(f"✓ Solution sauvegardée dans: {sys.argv[2]}")
         
     except Exception as e:
-        print(f"❌ Erreur lors de la sauvegarde: {e}")
+        print(f"Erreur lors de la sauvegarde: {e}")
     
     # =========================================================================
     # ÉTAPE 6: RÉCAPITULATIF FINAL
@@ -967,24 +967,24 @@ def main():
     print("RÉCAPITULATIF FINAL")
     print("=" * 70)
     
-    print(f"⏱️  Temps total d'exécution: {temps_total:.3f}s")
-    print(f"💰 Coût total de la solution: {cout_total:.2f}")
-    print(f"🚚 Nombre de routes générées: {len(routes)}")
+    print(f" Temps total d'exécution: {temps_total:.3f}s")
+    print(f" Coût total de la solution: {cout_total:.2f}")
+    print(f" Nombre de routes générées: {len(routes)}")
     
     if routes:
         # Statistiques détaillées
         capacite_utilisee_totale = sum(r['capacity_used'] for r in routes)
         stations_servies = sum(len(r['stations']) for r in routes)
         
-        print(f"📦 Capacité utilisée: {capacite_utilisee_totale}/{capacite_totale} "
+        print(f" Capacité utilisée: {capacite_utilisee_totale}/{capacite_totale} "
               f"({capacite_utilisee_totale/capacite_totale*100:.1f}%)")
-        print(f"🏪 Stations servies: {stations_servies}/{inst.S} "
+        print(f" Stations servies: {stations_servies}/{inst.S} "
               f"({stations_servies/inst.S*100:.1f}%)")
-        print(f"📊 Demande satisfaite: {capacite_utilisee_totale}/{demande_totale} "
+        print(f" Demande satisfaite: {capacite_utilisee_totale}/{demande_totale} "
               f"({capacite_utilisee_totale/demande_totale*100:.1f}%)")
         
         # Répartition par véhicule
-        print("\n📈 Répartition par véhicule:")
+        print("\n Répartition par véhicule:")
         for route in routes:
             taux_utilisation = route['capacity_used'] / route['total_capacity'] * 100
             print(f"  Véhicule {route['vehicle']}: {route['capacity_used']}/"
