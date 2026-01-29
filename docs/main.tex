@@ -1,26 +1,17 @@
-%--------------A VOTRE ATTENTION-------------%
-% Les étudiants en master qui disposent de plus de 3 chapitres dans leurs travaux peuvent en complèter
-% Les Membres doivent figurer dans la dernière version finale du mémoire après soutenance pour dépôt de mémoire
-
 \documentclass{ifri}
 \usepackage{titletoc}
 \setlength{\glsdescwidth}{0.65\textwidth}
-% \usepackage{lscape}
 
-\typeMemoire{Diplôme de Licence en Informatique}
-\optionFormation{Sécurité Informatique}
+\typeMemoire{Master en Informatique}
+\optionFormation{GL && SI && SIRI}
 \etudiant{Prenom \textbf{Nom}}
-\titreDuMemoire{--} %Implémention pour une meilleure sécurité dans les réseau LAN sous IPv6 // Proposition: Identification des vulnérabilités dans un reseau LAN IPv6 et mesures pour une meilleure sécurité.
+\titreDuMemoire{Multi-Product Vehicle Routing Problem with Changeover Cost}
 
 \dateSoutenance{-}
-%\promo{2\up{ème}}
-\anneeScolaire{--}
+\anneeScolaire{2025-2026}
 
-
-%%maitre de mémoire
 \encadrants{Prenom \textbf{Nom}}
 
-%% Membres du Jury
 \jurys{%
 \begin{tabular}{llll}
 	Nom et prénoms du président & Grade & Entité & Président \\
@@ -29,109 +20,113 @@
 \end{tabular}	
 }
 
-
 \hypersetup{
- pdftitle={--},
+ pdftitle={MPVRP-CC},
  pdfauthor={--},
- pdfsubject={--},
- pdfkeywords={--} 
- }
+ pdfsubject={Rapport de projet},
+ pdfkeywords={VRP, MPVRP, Changeover, optimisation} 
+}
 
 \color{bookColor}
 
-%importation du glossaire
+% importation du glossaire
 \loadglsentries{glossaire_reduit}
 
 \begin{document}
 
+% =====================
+% Page de garde
+% =====================
 \pageDeGarde
-%\pageTitre
-
 \pagecolor{white}
-
-%% page vide
-%\thispagestyle{empty}\ \clearpage
-
-
 \selectlanguage{french}
 
-% sommaire
-\pagenumbering{roman}
 
+% =====================
+% Sommaire
+% =====================
+\pagenumbering{roman}
 \setcounter{tocdepth}{0}
 \startlist{toc}
 \printlist{toc}{}{\chapter*{Sommaire}}
 \setcounter{tocdepth}{5}
 
-%% rdedicaces
-\include{0-dedicace}
-\newpage 
 
-%% remerciements
-\include{1-remerciements}
-\newpage 
-
-% Résume
-\include{2-resume}
+% =====================
+% Résumé
+% =====================
+\include{resume}
 \newpage
 
-%liste des figures
-\listoffigures 
+
+% =====================
+% Liste des figures
+% =====================
+\listoffigures
 \newpage
 
-%liste des tableaux
+
+% =====================
+% Liste des tableaux
+% =====================
 \listoftables
 \newpage
 
-%liste des algo
+
+% =====================
+% Liste des algos
+% =====================
 \selectlanguage{french}
 \listofalgorithmes
 \newpage
 
-% Les sigles et acronymes
+
+% =====================
+% Liste des sigles / acronymes
+% =====================
 \setglossarystyle{altlist}
 \printglossary[title=Liste des acronymes, toctitle=Liste des acronymes, type=\acronymtype]
 \newpage
 
-% Le glossaire proprement dit
-%\setglossarystyle{super}
-%\printglossary[type=main]
 
-
+% =====================
+% Chapitres principaux
+% =====================
 \pagenumbering{arabic}
 \setcounter{page}{1}
-%%introduction
-\include{3-introduction}
-%\lhead[]{} \rhead[]{} \chead[]{}
+
+\include{introduction}
 \selectlanguage{french}
 \fancyhead[L]{\tiny \leftmark}
 \fancyhead[R]{\scriptsize \rightmark}
 \fancyfoot[C]{\thepage}
 
-\chapter{-}\label{chap:1}
- \input{1-partie/1-fichier}
+\chapter{Présentation du problème}\label{chap:1}
+\input{1/presentation}
  
- \chapter{-}\label{chap:2}
- \input{2-partie/1-fichier}
+\chapter{Modélisation du problème}\label{chap:2}
+\input{2/modelisation}
  
-\chapter{--}\label{chap:3}
- \input{3-partie/1-fichier}
- 
-% \include{perspectives}
-%%conclusion
-\include{4-conclusion}
-% 
+\chapter{Résolution}\label{chap:3}
+\input{3/resolution}
+
+\include{conclusion}
 \lhead[]{} \rhead[]{} \chead[]{}
 
-%%biblio
+
+% =====================
+% Bibliographie
+% =====================
 \addcontentsline{toc}{chapter}{Bibliographie}
 \bibliographystyle{abbrv}
 \bibliography{biblio}
 
 
-%\include{annexe}
-
+% =====================
+% Table des matières
+% =====================
 \newpage
 \tableofcontents
 
-\end{document}          
+
+\end{document}
