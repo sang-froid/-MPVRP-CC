@@ -1,5 +1,74 @@
 \chapter{Présentation du problème}
 
-\section{Description générale}
-Le MPVRP-CC consiste à desservir un ensemble de clients avec un parc de véhicules, 
-chaque client demandant potentiellement plusieurs produits...
+\section{Contexte général}
+
+La logistique de distribution de produits pétroliers constitue un enjeu majeur pour les entreprises de transport et de distribution d’énergie. Ces opérations impliquent la livraison de plusieurs types de produits (essence, gasoil, kérosène, etc.) depuis des dépôts vers un ensemble de stations de service géographiquement dispersées, à l’aide d’une flotte de camions-citernes.
+
+Dans ce contexte, l’optimisation des tournées de livraison est essentielle afin de réduire les coûts opérationnels tout en garantissant la satisfaction complète des demandes. Cette problématique s’inscrit dans la famille des \emph{Vehicle Routing Problems} (VRP), qui sont largement étudiés en recherche opérationnelle. Toutefois, la présence de plusieurs produits et de contraintes spécifiques liées au transport en citerne rend le problème significativement plus complexe.
+
+\section{Définition du MPVRP-CC}
+
+Le \emph{Multi-Product Vehicle Routing Problem with Changeover Cost} (MPVRP-CC) est une extension du problème classique de tournées de véhicules. Il vise à organiser la distribution efficace de plusieurs types de produits à partir de dépôts vers des stations de service, en tenant compte des coûts induits par le changement de produit transporté.
+
+Chaque station de service exprime une demande spécifique pour chaque type de produit. Pour satisfaire ces demandes, une flotte hétérogène de camions-citernes est déployée. Chaque véhicule possède une capacité de chargement limitée et est rattaché à un garage donné, qui constitue son point de départ et de retour.
+
+La particularité majeure du MPVRP-CC réside dans la gestion des produits : un camion ne peut transporter qu’un seul type de produit à la fois. Lorsqu’un véhicule souhaite changer de produit, une opération de nettoyage de la citerne est nécessaire, ce qui engendre un coût supplémentaire appelé \emph{coût de changeover}.
+
+\section{Réseau logistique et acteurs}
+
+Le problème est défini sur un réseau logistique composé de plusieurs types de sites :
+
+\begin{itemize}
+	\item les \textbf{garages}, qui sont les points de départ et de retour des véhicules ;
+	\item les \textbf{dépôts}, où les véhicules chargent les produits ;
+	\item les \textbf{stations de service}, qui représentent les clients à desservir.
+\end{itemize}
+
+Une matrice de distances est définie entre l’ensemble de ces sites, permettant d’évaluer les coûts de transport. Les dépôts sont supposés disposer de stocks suffisants pour satisfaire l’ensemble des demandes, et tous les sites sont accessibles sans contrainte temporelle.
+
+\section{Organisation des tournées}
+
+Les opérations de chaque camion suivent une structure rigoureuse. Une tournée complète commence et se termine obligatoirement au garage auquel le véhicule est affecté. Entre ces deux points, la tournée est constituée d’une succession de \emph{mini-tournées}.
+
+Une mini-tournée correspond à un cycle de livraison composé de trois étapes :
+\begin{itemize}
+	\item le chargement du véhicule dans un dépôt pour un produit donné ;
+	\item la livraison de ce produit à une ou plusieurs stations de service ;
+	\item le retour vers un dépôt pour un éventuel rechargement ou vers le garage en fin de tournée.
+\end{itemize}
+
+Lors d’une mini-tournée, un véhicule ne peut transporter qu’un seul type de produit et ne peut pas desservir plusieurs fois une même station pour ce produit.
+
+\section{Gestion multi-produits et coût de changeover}
+
+Chaque véhicule est initialement configuré pour transporter un produit donné. Toutefois, il est possible de modifier ce produit lors d’un passage dans un dépôt. Cette opération nécessite un nettoyage de la citerne afin d’éviter toute contamination entre produits, ce qui entraîne un coût spécifique.
+
+Le modèle doit donc arbitrer entre deux stratégies :
+\begin{itemize}
+	\item conserver le même produit et effectuer éventuellement des détours supplémentaires ;
+	\item changer de produit au dépôt en payant le coût de changeover.
+\end{itemize}
+
+Cette décision influence directement le coût total et la structure des tournées.
+
+\section{Objectifs du problème}
+
+L’objectif principal du MPVRP-CC est de déterminer l’ensemble des tournées des véhicules de manière à minimiser le coût total du système logistique. Ce coût est composé de :
+\begin{itemize}
+	\item le coût de transport, proportionnel à la distance totale parcourue ;
+	\item le coût total des changements de produit, lié aux opérations de nettoyage des citernes.
+\end{itemize}
+
+\section{Contraintes du modèle}
+
+Toute solution admissible doit respecter un ensemble strict de contraintes opérationnelles :
+\begin{itemize}
+	\item \textbf{Satisfaction de la demande} : toutes les demandes des stations, pour tous les produits, doivent être entièrement satisfaites ;
+	\item \textbf{Capacité des véhicules} : la quantité transportée ne doit jamais dépasser la capacité maximale du camion ;
+	\item \textbf{Contraintes de flux} : chaque véhicule doit terminer sa tournée à son garage d’origine ;
+	\item \textbf{Unicité des livraisons} : un véhicule ne peut pas desservir plusieurs fois une même station pour un même produit au cours d’une mini-tournée.
+\end{itemize}
+
+\section{Positionnement du travail}
+
+Le MPVRP-CC constitue un problème combinatoire complexe, particulièrement adapté à l’étude de méthodes d’optimisation exactes et hybrides. Dans ce travail, une modélisation basée sur la programmation par contraintes est proposée, et le solveur OR-Tools CP-SAT est utilisé afin de résoudre efficacement différentes catégories d’instances du problème.
