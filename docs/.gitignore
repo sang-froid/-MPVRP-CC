@@ -1,0 +1,55 @@
+# --- LaTeX core ---
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.nav
+*.snm
+*.vrb
+*.mtc*
+
+# --- Bibliography ---
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+
+# --- Index / glossaries ---
+*.idx
+*.ilg
+*.ind
+*.glg
+*.glo
+*.gls
+*.ist
+*.acn
+*.acr
+*.alg
+*.nlo
+
+# --- Temporary / backup files ---
+*~
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# --- Build directories ---
+build/
+out/
+dist/
+
+# --- PDF output (optionnal) ---
+# *.pdf
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

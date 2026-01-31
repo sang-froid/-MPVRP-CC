@@ -1,0 +1,233 @@
+\chapter{Modélisation du problème}
+
+\section{Ensembles et indices}
+
+\begin{itemize}
+	\item $\mathcal{K}$ : ensemble des véhicules, indice $k$.
+	\item $\mathcal{P}$ : ensemble des produits, indice $p$.
+	\item $\mathcal{G}$ : ensemble des garages, indice $g$.
+	\item $\mathcal{D}$ : ensemble des dépôts, indice $d$.
+	\item $\mathcal{S}$ : ensemble des stations de service (clients), indice $s$.
+	\item $\mathcal{V}$ : ensemble des nœuds du réseau (images des garages, dépôts, stations), indices $i,j$.
+	\item $\mathcal{A}\subseteq\mathcal{V}\times\mathcal{V}$ : arcs orientés, indice $(i,j)$.
+	\item $\mathcal{R}$ : ensemble des trajets possibles par véhicule, indice $r$ (borne supérieure finie).
+\end{itemize}
+
+Nous notons $\phi^G(\cdot),\phi^D(\cdot),\phi^S(\cdot)$ les applications injectives des garages/dépôts/stations vers les nœuds de $\mathcal{V}$. Par hypothèse, $\phi^G(\mathcal{G})\cap\phi^D(\mathcal{D})=\varnothing$ et les garages sont distincts des stations.
+
+\section{Paramètres}
+
+\begin{itemize}
+	\item $c_{ij}$ : coût de déplacement (ou distance) sur l’arc $(i,j)\in\mathcal{A}$.
+	\item $Q_k$ : capacité (volume) du véhicule $k$.
+	\item $d_s^p \ge 0$ : demande du produit $p$ à la station $s$.
+	\item $\alpha_{kg}\in\{0,1\}$ : vaut 1 si le véhicule $k$ est affecté au garage $g$ (garage d’origine), avec $\sum_g\alpha_{kg}=1$.
+	\item $InitProd_k \in \mathcal{P}$ : produit de configuration initiale du véhicule $k$ (résidu/état uniquement, pas une quantité transportée).
+	\item $Stock_{d}^p \ge 0$ : stock disponible du produit $p$ au dépôt $d$.
+	\item $C_{pq}$ : coût de changement pour passer du produit $p$ au produit $q$ (donné par la matrice de l’instance). En général $C_{pp}=0$.
+\end{itemize}
+
+\section{Variables de décision}
+
+\paragraph{Routage / utilisation}
+
+\begin{itemize}
+	\item $x_{ij}^{kr} \in\{0,1\}$ : vaut 1 si le véhicule $k$ parcourt l’arc $(i,j)$ durant le trajet $r$, 0 sinon.
+	\item $y_{kr} \in\{0,1\}$ : vaut 1 si le trajet $r$ du véhicule $k$ est utilisé, 0 sinon.
+\end{itemize}
+
+\paragraph{Produit transporté sur un arc et flux de quantité}
+
+\begin{itemize}
+	\item $y_{ij}^{kpr} \in\{0,1\}$ : vaut 1 si le véhicule $k$, lors du trajet $r$, parcourt l’arc $(i,j)$ en transportant le produit $p$ sur cet arc.
+	\item $f_{ij}^{kpr} \ge 0$ : quantité (volume) du produit $p$ transportée par le véhicule $k$ sur le trajet $r$ le long de l’arc $(i,j)$.
+\end{itemize}
+
+\paragraph{Chargement / quantités livrées}
+
+\begin{itemize}
+	\item $w_{d}^{kpr} \ge 0$ : quantité du produit $p$ chargée au dépôt $d$ par le véhicule $k$ lors du trajet $r$.
+	\item $q_{s}^{kpr} \ge 0$ : quantité du produit $p$ livrée à la station $s$ par le véhicule $k$ lors du trajet $r$.
+\end{itemize}
+
+\paragraph{Indicateurs de changement de produit}
+
+\begin{itemize}
+	\item $t_{d,k,r}^{p,q} \in\{0,1\}$ : vaut 1 si le véhicule $k$, durant le trajet $r$, visite le dépôt $d$ et passe du produit $p$ (entrant) au produit $q$ (sortant).
+\end{itemize}
+
+\section{Objectif}
+
+Minimiser le coût total de déplacement plus le coût total de changement de produit :
+\begin{equation}
+	\min\; \sum_{k\in\mathcal{K}}\sum_{r\in\mathcal{R}}\sum_{(i,j)\in\mathcal{A}} c_{ij}\,x_{ij}^{kr} \;+
+	\sum_{k\in\mathcal{K}}\sum_{r\in\mathcal{R}}\sum_{d\in\mathcal{D}}\sum_{p\in\mathcal{P}}\sum_{q\in\mathcal{P}} C_{pq} \; t_{d,k,r}^{p,q}.
+\end{equation}
+
+\section{Contraintes}
+
+\paragraph{Affectation aux garages (paramètre)}
+
+\begin{equation}
+	\sum_{g\in\mathcal{G}} \alpha_{kg} = 1 \quad \forall k\in\mathcal{K}.
+\end{equation}
+
+\paragraph{Utilisation des trajets et départs/retours au garage}
+
+\begin{align}
+	\sum_{g\in\mathcal{G}} \alpha_{kg} \sum_{j\in\delta^+(\phi^G(g))} x_{\phi^G(g),j}^{kr} &= y_{kr} \quad \forall k,r, \\
+	\sum_{g\in\mathcal{G}} \alpha_{kg} \sum_{i\in\delta^-(\phi^G(g))} x_{i,\phi^G(g)}^{kr} &= y_{kr} \quad \forall k,r.
+\end{align}
+
+\paragraph{Conservation du flux de routage (arcs binaires)}
+
+\begin{equation}
+	\sum_{j\in\delta^-(i)} x_{ji}^{kr} = \sum_{j\in\delta^+(i)} x_{ij}^{kr} \quad \forall i\in\mathcal{V},\;\forall k,r.
+\end{equation}
+
+\paragraph{Couplage arc–produit}
+
+Chaque arc utilisé doit être associé à exactement un produit transporté (si l’arc est utilisé) :
+\begin{equation}
+	\sum_{p\in\mathcal{P}} y_{ij}^{kpr} = x_{ij}^{kr} \quad \forall (i,j),\; k,r.
+\end{equation}
+
+Lien entre l’affectation du produit et la quantité transportée sur le même arc (borne supérieure de capacité) :
+\begin{equation}
+	0 \le f_{ij}^{kpr} \le Q_k \, y_{ij}^{kpr} \quad \forall (i,j),\;k,p,r.
+\end{equation}
+
+\paragraph{Conservation des flux de quantité (par produit) — bilan aux nœuds}
+
+Pour un nœud arbitraire $v=\phi^S(s)$ (station) : le flux entrant du produit $p$ est égal à la quantité livrée plus le flux sortant :
+\begin{equation}
+	\sum_{i\in\delta^-(\phi^S(s))} f_{i,\phi^S(s)}^{kpr} = q_s^{kpr} + \sum_{j\in\delta^+(\phi^S(s))} f_{\phi^S(s),j}^{kpr} \quad \forall s,k,p,r.
+\end{equation}
+
+Pour les nœuds de dépôt $v=\phi^D(d)$ : le flux sortant est égal au résidu entrant plus la quantité chargée à ce dépôt (le chargement au dépôt est autorisé) :
+\begin{equation}
+	\sum_{j\in\delta^+(\phi^D(d))} f_{\phi^D(d),j}^{kpr} = \sum_{i\in\delta^-(\phi^D(d))} f_{i,\phi^D(d)}^{kpr} + w_{d}^{kpr} \quad \forall d,k,p,r.
+\end{equation}
+
+Pour les nœuds garage $v=\phi^G(g)$, on suppose qu’il n’y a ni chargement ni livraison ; les flux entrants et sortants doivent s’équilibrer (géré par la conservation du routage) ; on peut également imposer une quantité transportée nulle au garage si nécessaire :
+\begin{equation}
+	\sum_{j\in\delta^+(\phi^G(g))} f_{\phi^G(g),j}^{kpr} = \sum_{i\in\delta^-(\phi^G(g))} f_{i,\phi^G(g)}^{kpr} \quad \forall g,k,p,r.
+\end{equation}
+
+\paragraph{Satisfaction de la demande (livraisons fractionnées autorisées)}
+
+La quantité totale livrée à la station $s$ sur l’ensemble des véhicules et trajets doit satisfaire la demande :
+\begin{equation}
+	\sum_{k\in\mathcal{K}}\sum_{r\in\mathcal{R}} q_s^{kpr} = d_s^p \quad \forall s,p.
+\end{equation}
+
+\paragraph{Lien entre livraisons et arrivées (évite les livraisons fantômes)}
+
+Une livraison positive à la station $s$ lors du trajet $r$ nécessite que le véhicule arrive effectivement à $s$ lors de ce trajet (c’est-à-dire qu’il existe un arc entrant associé à un produit) :
+\begin{equation}
+	q_s^{kpr} \le \sum_{i\in\delta^-(\phi^S(s))} f_{i,\phi^S(s)}^{kpr} \quad \forall s,k,p,r.
+\end{equation}
+
+(Combinée à la non-négativité, cette contrainte garantit que les livraisons sont supportées par une quantité effectivement transportée.)
+
+\paragraph{Capacité par trajet}
+
+La quantité totale transportée à tout instant par un véhicule sur un trajet ne peut pas dépasser sa capacité ; une inégalité agrégée utilisant les chargements et les quantités transportées permet d’assurer le respect de la capacité. Une contrainte suffisante et sûre est :
+\begin{equation}
+	\sum_{(i,j)\in\mathcal{A}} \sum_{p\in\mathcal{P}} f_{ij}^{kpr} \le Q_k \, y_{kr} \quad \forall k,r.
+\end{equation}
+
+(Cette formulation peut compter une même unité plusieurs fois le long des arcs ; une formulation alternative plus serrée peut suivre la quantité embarquée par position, mais celle-ci est plus simple et conservatrice si les flux sont cohérents.)
+
+\paragraph{Limites de stock des dépôts}
+
+La quantité totale chargée depuis le dépôt $d$ pour le produit $p$ ne peut pas dépasser le stock :
+\begin{equation}
+	\sum_{k\in\mathcal{K}}\sum_{r\in\mathcal{R}} w_{d}^{kpr} \le Stock_{d}^p \quad \forall d,p.
+\end{equation}
+
+Lien entre les chargements et les flux sortants de produits depuis le dépôt (cohérence) :
+\begin{equation}
+	\sum_{j\in\delta^+(\phi^D(d))} f_{\phi^D(d),j}^{kpr} \ge w_{d}^{kpr} \quad \forall d,k,p,r.
+\end{equation}
+
+(Avec le bilan aux nœuds, cela impose que la quantité chargée apparaisse sur les arcs sortants.)
+
+\paragraph{Continuité du produit : changement uniquement aux dépôts}
+
+Sur les nœuds non dépôts (stations, garages), le produit transporté ne peut pas changer : le produit des arcs entrants doit être identique à celui des arcs sortants. Cela est imposé au nœud $v$ en liant les indicateurs de produits entrants et sortants. Pour les nœuds station $s$ :
+\begin{equation}
+	\sum_{i\in\delta^-(\phi^S(s))} y_{i,\phi^S(s)}^{kpr} = \sum_{j\in\delta^+(\phi^S(s))} y_{\phi^S(s),j}^{kpr} \quad \forall s,k,p,r.
+\end{equation}
+
+Pour les nœuds garage $g$, la même règle s’applique (aucune reconfiguration de produit n’est autorisée au garage) :
+\begin{equation}
+	\sum_{i\in\delta^-(\phi^G(g))} y_{i,\phi^G(g)}^{kpr} = \sum_{j\in\delta^+(\phi^G(g))} y_{\phi^G(g),j}^{kpr} \quad \forall g,k,p,r.
+\end{equation}
+
+Aux nœuds dépôt, le changement de produit est autorisé ; il est modélisé explicitement à l’aide des variables $t$ ci-dessous.
+
+\paragraph{Modélisation du changement de produit aux dépôts}
+
+Pour chaque visite du véhicule $k$ au trajet $r$ au dépôt $d$, on détecte le produit entrant et le produit sortant du dépôt et on active l’indicateur correspondant $t_{d,k,r}^{p,q}$.
+
+Soit $InProd_{d,k,r}^p$ une expression binaire valant 1 si le véhicule $k$, au trajet $r$, arrive au dépôt $d$ en transportant le produit $p$ sur un arc entrant ; de même, $OutProd_{d,k,r}^q$ vaut 1 si le véhicule quitte $d$ sur un arc sortant en transportant le produit $q$. On linéarise ces expressions par les inégalités :
+\begin{align}
+	InProd_{d,k,r}^p &\le \sum_{i\in\delta^-(\phi^D(d))} y_{i,\phi^D(d)}^{kpr}, \quad InProd_{d,k,r}^p \in\{0,1\}, \\
+	OutProd_{d,k,r}^q &\le \sum_{j\in\delta^+(\phi^D(d))} y_{\phi^D(d),j}^{kqr}, \quad OutProd_{d,k,r}^q \in\{0,1\}.
+\end{align}
+
+Puis on lie les indicateurs $t$ :
+\begin{align}
+	t_{d,k,r}^{p,q} &\le InProd_{d,k,r}^p, \\
+	t_{d,k,r}^{p,q} &\le OutProd_{d,k,r}^q, \\
+	t_{d,k,r}^{p,q} &\ge InProd_{d,k,r}^p + OutProd_{d,k,r}^q -1.
+\end{align}
+
+De plus, on impose qu’au plus un produit entrant et au plus un produit sortant soient sélectionnés pour une visite donnée (si un véhicule visite un dépôt plusieurs fois sur différents trajets, ceux-ci sont distingués par $r$) :
+\begin{align}
+	\sum_{p\in\mathcal{P}} InProd_{d,k,r}^p &\le y_{kr}, \\
+	\sum_{q\in\mathcal{P}} OutProd_{d,k,r}^q &\le y_{kr}.
+\end{align}
+
+(Si un véhicule ne visite pas le dépôt $d$ au trajet $r$, les deux sommes valent 0.)
+
+\paragraph{Gestion du produit initial}
+
+Pour la première visite à un dépôt lors d’un trajet, le produit « entrant » doit être considéré comme le $InitProd_k$ du véhicule. Le modèle linéaire ci-dessus autorise $InProd$ à être nul pour tout $p$ si le véhicule n’a pas de produit entrant (par exemple s’il démarre à vide). Pour garantir la prise en compte de l’état initial, une approche pratique consiste à définir un indicateur entrant artificiel pour le premier dépôt égal au produit initial ; dans notre formulation, nous traitons le cas initial en autorisant un ajustement du paramètre d’instance $C_{p,q}$ : si le modèle doit imposer l’absence de coût lorsque le véhicule passe de sa configuration initiale au premier produit chargé, on fixe $C_{InitProd_k, q}=0$ pour tout $q$ (prétraitement de l’instance). Alternativement, on peut introduire des contraintes supplémentaires forçant le $InProd$ du premier dépôt à correspondre à $InitProd_k$ ; nous laissons ce choix à l’implémentation et documentons les deux options.
+
+\paragraph{Cohérence entre les arcs produits et $InProd/OutProd$}
+
+Pour garantir que les indicateurs binaires $InProd/OutProd$ reflètent bien les arcs entrants et sortants réels, on impose les contraintes (suffisantes) suivantes :
+\begin{align}
+	InProd_{d,k,r}^p &\ge y_{i,\phi^D(d)}^{kpr} \quad \forall i\in\delta^-(\phi^D(d)), \\
+	OutProd_{d,k,r}^q &\ge y_{\phi^D(d),j}^{kqr} \quad \forall j\in\delta^+(\phi^D(d)).
+\end{align}
+
+Combinées aux liaisons précédentes, ces contraintes rendent $t_{d,k,r}^{p,q}$ actif exactement lorsque le véhicule arrive avec $p$ et repart avec $q$.
+
+\paragraph{Comptabilisation des changements et cohérence de l’objectif}
+
+Les variables $t_{d,k,r}^{p,q}$ représentent les transitions $p\to q$ lors des visites de dépôts ; l’objectif somme les termes $C_{pq} t_{d,k,r}^{p,q}$. Si le prétraitement de l’instance fixe $C_{InitProd_k,q}=0$, on obtient le comportement souhaité où la configuration initiale n’entraîne pas de coût de changement pour le premier chargement lorsque cela est requis.
+
+\paragraph{Bris de symétrie sur l’utilisation des trajets (optionnel)}
+
+\begin{equation}
+	y_{k,r+1} \le y_{kr} \quad \forall k,\; r=1,\dots,|\mathcal{R}|-1.
+\end{equation}
+
+\paragraph{Domaines des variables}
+
+\begin{align}
+	x_{ij}^{kr} &\in\{0,1\}, \; y_{ij}^{kpr} \in\{0,1\}, \; t_{d,k,r}^{p,q}\in\{0,1\}, \\
+	f_{ij}^{kpr} &\ge 0, \; w_{d}^{kpr} \ge 0, \; q_s^{kpr} \ge 0, \; y_{kr}\in\{0,1\}. 
+\end{align}
+
+\section{Remarques et notes pratiques}
+
+\begin{itemize}
+	\item Le modèle privilégie la clarté à la compacité : les variables binaires produit-sur-arc $y_{ij}^{kpr}$ et les variables de flux $f_{ij}^{kpr}$ facilitent l’imposition du fait que les changements de produit n’ont lieu qu’aux dépôts et le calcul des coûts de changement. Elles augmentent le nombre de variables mais rendent la logique de changement explicite.
+	\item Les variables $t_{d,k,r}^{p,q}$ linéarisent la détection d’une transition de produit lors d’une visite de dépôt. Une alternative consiste à indexer les visites de dépôt (ordonnées) et à utiliser des liaisons entre visites consécutives ; cette approche est souvent plus serrée mais plus complexe.
+	\item Cas particulier du produit initial : si la logique métier impose que le premier chargement depuis la configuration initiale d’un véhicule soit toujours gratuit, il suffit de fixer les $C_{InitProd_k, q}=0$ correspondants dans l’instance avant résolution.
+	\item La contrainte de capacité donnée est conservatrice ; une contrainte de capacité basée sur les flux, suivant la quantité embarquée le long des arcs, peut être introduite si nécessaire pour améliorer les performances du solveur.
+\end{itemize}

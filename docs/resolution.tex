@@ -1,0 +1,457 @@
+\chapter{Résolution}
+
+\section{Présentation du solveur utilisé}
+
+\subsection{OR-Tools CP-SAT : Un solveur de pointe}
+
+OR-Tools (Google Optimization Tools) est une suite open-source développée par Google pour résoudre des problèmes d'optimisation complexes.
+
+\textbf{Caractéristiques techniques :}
+\begin{itemize}
+	\item Type : Solveur par programmation par contraintes (CP-SAT)
+	\item Algorithme : Recherche arborescente avec propagation de contraintes
+	\item Parallélisation : Support multi-threads (4 workers)
+	\item Heuristiques : Incorporation de solutions initiales (Hints)
+	\item Garanties : Trouve des solutions optimales prouvées
+\end{itemize}
+
+\section{Architecture du code}
+
+\subsection{Structure modulaire en 5 parties principales}
+
+\subsubsection{Chargement des données (\texttt{load\_instance})}
+
+La première étape consiste à \textbf{charger l’instance du problème} depuis un fichier \texttt{.dat}.  
+
+Les données extraites sont :
+\begin{itemize}
+	\item le nombre de \textbf{produits}, \textbf{stations}, \textbf{véhicules}, \textbf{dépôts} et \textbf{garages}
+	\item les \textbf{coûts de transition entre produits}
+	\item les \textbf{capacités des véhicules}
+	\item les \textbf{demandes par station et par produit}
+	\item les \textbf{coordonnées géographiques} des entités
+\end{itemize}
+
+\subsubsection{Analyse préalable de faisabilité}
+
+Avant toute résolution, une \textbf{analyse de faisabilité} est réalisée :
+\begin{itemize}
+	\item calcul de la \textbf{demande totale}
+	\item calcul de la \textbf{capacité totale disponible}
+\end{itemize}
+
+Cette étape permet :
+\begin{itemize}
+	\item de détecter rapidement les cas \textbf{impossibles}
+	\item d’interpréter correctement les résultats du solveur
+	\item d’expliquer d’éventuelles situations d’infaisabilité dans le rapport
+\end{itemize}
+
+\subsubsection{Construction d’une solution heuristique initiale}
+
+Afin d’améliorer les performances du solveur exact, une \textbf{solution heuristique initiale} est construite.
+
+\paragraph{Principe de l’heuristique :}
+\begin{itemize}
+	\item chaque véhicule conserve son \textbf{produit initial}
+	\item il dessert les \textbf{stations les plus proches} demandant ce produit
+	\item il livre jusqu’à \textbf{épuisement de sa capacité}
+\end{itemize}
+
+\paragraph{Rôle de cette étape :}
+\begin{itemize}
+	\item produire une \textbf{solution faisable rapidement}
+	\item fournir une \textbf{borne supérieure initiale}
+	\item guider le solveur CP-SAT grâce au mécanisme de \textbf{hint}
+\end{itemize}
+
+Cette solution n’est pas optimale, mais elle est réaliste et exploitable.
+
+\subsubsection{Modélisation mathématique avec CP-SAT}
+
+\paragraph{Variables de décision}
+\begin{itemize}
+	\item \textbf{Variables de livraison} : quantité livrée par un véhicule à une station pour un produit donné
+	\item \textbf{Variables binaires de visite} : indiquent si un véhicule visite une station
+\end{itemize}
+
+Ces variables permettent de modéliser à la fois :
+\begin{itemize}
+	\item les quantités transportées
+	\item la structure des tournées
+\end{itemize}
+
+\paragraph{Contraintes du modèle}
+Les principales contraintes sont :
+\begin{enumerate}
+	\item \textbf{Satisfaction complète de la demande} : chaque demande (station, produit) doit être entièrement satisfaite par l’ensemble des véhicules
+	\item \textbf{Capacité des véhicules} : la somme des quantités livrées par un véhicule ne peut pas dépasser sa capacité
+	\item \textbf{Lien livraison--visite} : un véhicule est considéré comme visitant une station s’il y livre une quantité strictement positive
+\end{enumerate}
+
+Ces contraintes garantissent la \textbf{faisabilité logistique} de la solution.
+
+\subsubsection{Fonction objectif}
+
+La fonction objectif vise à \textbf{minimiser le coût total}, composé de :
+\begin{enumerate}
+	\item \textbf{Coût de transport} : distance entre le garage du véhicule et les stations visitées
+	\item \textbf{Coût de changement de produit (changeover)} : pénalité lorsqu’un véhicule livre un produit différent de son produit initial
+	\item \textbf{Coût de consolidation} : coût fixe par visite afin de limiter le nombre de stations visitées et favoriser des tournées plus compactes
+\end{enumerate}
+
+\subsubsection{Intégration de la solution heuristique (Hint)}
+
+La solution heuristique construite précédemment est injectée dans le modèle sous forme de \textbf{point de départ}.
+
+\textbf{Avantages :}
+\begin{itemize}
+	\item accélération de la recherche
+	\item amélioration de la qualité des premières solutions
+	\item réduction du temps de calcul
+\end{itemize}
+
+Le solveur reste libre d’améliorer ou de modifier cette solution.
+
+\subsubsection{Résolution avec OR-Tools CP-SAT}
+
+Le solveur est ensuite lancé avec :
+\begin{itemize}
+	\item une \textbf{limite de temps}
+	\item une \textbf{recherche multi-threads}
+	\item un \textbf{critère d’écart relatif} pour accepter une solution quasi-optimale
+\end{itemize}
+
+À l’issue de la résolution, le solveur retourne :
+\begin{itemize}
+	\item une solution \textbf{optimale}, \textbf{faisable}, ou
+	\item un statut d’\textbf{infaisabilité} clairement identifié
+\end{itemize}
+
+\subsubsection{Analyse et validation des résultats}
+
+La solution obtenue est analysée afin de :
+\begin{itemize}
+	\item vérifier que \textbf{toutes les demandes sont satisfaites}
+	\item mesurer le \textbf{taux d’utilisation des véhicules}
+	\item évaluer le \textbf{coût total}
+	\item comparer la solution finale à la solution heuristique initiale
+\end{itemize}
+
+Cette étape permet de justifier la qualité de la solution.
+
+\subsubsection{Visualisation des résultats}
+
+Une visualisation graphique est générée pour :
+\begin{itemize}
+	\item représenter les \textbf{garages, dépôts et stations}
+	\item afficher les \textbf{routes par véhicule}
+	\item illustrer les \textbf{quantités livrées}
+\end{itemize}
+
+\subsubsection{Sauvegarde et synthèse finale}
+
+Enfin, la solution est :
+\begin{itemize}
+	\item sauvegardée dans un fichier de sortie
+	\item accompagnée d’un \textbf{résumé chiffré} :
+	\begin{itemize}
+		\item coût total
+		\item nombre de routes
+		\item taux de satisfaction de la demande
+		\item taux d’utilisation des capacités
+	\end{itemize}
+\end{itemize}
+
+
+\section{Analyse des résultats par catégorie d'instances}
+
+\subsection{Instance \textit{small}}
+
+Ici le texte est effectué sur de petite instance (small instance). La commande de test est :
+\begin{lstlisting}[language=bash]
+python solver.py instances/small.dat  solution.dat
+\end{lstlisting}
+
+\subsubsection{Présentation des résultats de l’instance}
+
+\paragraph{Description de l’instance}
+
+L’instance catégorie \textit{small} se caractérise par une taille réduite, permettant de valider le bon fonctionnement du modèle et du solveur.
+
+\begin{itemize}
+	\item Nombre de stations : 5
+	\item Nombre de produits : 2
+	\item Nombre de véhicules : 2
+	\item Nombre de dépôts : 1
+	\item Nombre de garages : 1
+\end{itemize}
+
+Cette instance représente un cas simple mais représentatif, dans lequel chaque station peut demander un ou plusieurs produits.
+
+\paragraph{Analyse de faisabilité a priori}
+
+Avant la résolution, une analyse de faisabilité est effectuée afin de vérifier l’adéquation entre la demande globale et la capacité totale disponible.
+\begin{itemize}
+	\item Demande totale : 6 900 unités
+	\item Capacité totale des véhicules : 9 000 unités
+\end{itemize}
+
+La capacité totale étant supérieure à la demande, l’instance est théoriquement faisable.
+\begin{itemize}
+	\item Marge de capacité : 2 100 unités
+	\item Ratio demande / capacité : 0,77
+\end{itemize}
+
+\paragraph{Résolution avec OR-Tools CP-SAT}
+
+La résolution est effectuée à l’aide du solveur OR-Tools CP-SAT, basé sur la programmation par contraintes et la recherche SAT.
+\begin{itemize}
+	\item \textbf{Variables de décision} : 2 véhicules × 5 stations × 2 produits = 20 variables principales
+	\item \textbf{Contraintes} : 
+	\begin{itemize}
+		\item 7 contraintes de satisfaction de la demande
+		\item 10 contraintes liant livraison et visite
+		\item 2 contraintes de capacité des véhicules
+	\end{itemize}
+	\item \textbf{Fonction objectif} : minimisation du coût total (distance + coûts de changement de produit), composée de 30 termes
+\end{itemize}
+
+La phase de modélisation est réalisée en 0,003 seconde, ce qui montre une construction efficace du modèle.
+
+
+\paragraph{Solution heuristique initiale}
+
+Une solution heuristique est construite afin de fournir un point de départ au solveur CP-SAT.
+\begin{itemize}
+	\item \textbf{Véhicule 1 (Produit initial 1, capacité 5000)} : dessert 3 stations, capacité utilisée : 2 500 / 5 000
+	\item \textbf{Véhicule 2 (Produit initial 2, capacité 4000)} : dessert 4 stations, capacité utilisée : 4 000 / 4 000
+\end{itemize}
+
+Le coût estimé de cette solution initiale est de \textbf{18 937}, et \textbf{7 hints} sont fournis au solveur.
+
+\paragraph{Résultats de la résolution}
+
+Le solveur CP-SAT atteint une solution \textbf{OPTIMALE}.
+\begin{itemize}
+	\item Statut : OPTIMAL
+	\item Valeur de l’objectif : 13 418
+	\item Temps de résolution : 0,058 s
+	\item Temps total (modélisation + résolution) : 0,061 s
+	\item Amélioration par rapport à la solution heuristique initiale : 5 519 unités soit 29,1 \%
+\end{itemize}
+
+Toutes les demandes sont intégralement satisfaites.
+
+\subsection{Analyse argumentée des résultats de l’instance}
+
+\subsubsection{Qualité de la solution obtenue}
+
+La solution trouvée est optimale et respecte l’ensemble des contraintes du problème. Le solveur parvient à réduire significativement le coût total par rapport à la solution heuristique initiale, ce qui démontre l’efficacité de l’exploration de l’espace des solutions par CP-SAT.
+
+\subsubsection{Utilisation des capacités des véhicules}
+
+Les capacités des véhicules sont exploitées de manière équilibrée :
+\begin{itemize}
+	\item Véhicule 1 : 64 \% de capacité utilisée
+	\item Véhicule 2 : 92,5 \% de capacité utilisée
+\end{itemize}
+
+Cette répartition permet de satisfaire l’ensemble des demandes tout en limitant les surcharges inutiles.
+
+\section{Instance \textit{medium}}
+
+L’instance medium du problème MPVRP-CC se caractérise par une taille intermédiaire, permettant d’évaluer à la fois la qualité de la modélisation et les performances du solveur. Pour la tester, on utilise la commande :
+
+\begin{lstlisting}[language=bash]
+python solver.py instances/medium.dat  solution.dat
+\end{lstlisting}
+
+\subsection{Caractéristiques principales}
+
+\begin{itemize}
+	\item Stations : 12
+	\item Produits : 3
+	\item Véhicules : 4
+	\item Dépôt : 1
+	\item Garages : 2
+	\item Demande totale : 19 100 unités
+	\item Capacité totale des véhicules : 21 000 unités
+	\item Ratio demande/capacité : 0,91
+\end{itemize}
+
+Cette configuration garantit la faisabilité théorique du problème tout en conservant une complexité suffisante pour tester l’efficacité du solveur.
+
+\subsection{Résolution avec OR-Tools CP-SAT}
+
+\begin{itemize}
+	\item Solveur utilisé : OR-Tools CP-SAT
+	\item Temps limite : 30 s
+	\item Temps effectif de résolution : 5,85 s
+	\item Statut final : OPTIMAL
+	\item Valeur fonction objectif : 27 396
+\end{itemize}
+
+Une solution heuristique initiale a été générée avant la résolution exacte :
+\begin{itemize}
+	\item Coût heuristique initial : 103 951
+	\item La solution optimale finale représente une amélioration de 73,6 \%
+\end{itemize}
+
+\subsection{Résultats opérationnels}
+
+\begin{itemize}
+	\item 100 \% des demandes des stations sont satisfaites
+	\item 4 routes générées, correspondant aux 4 véhicules
+	\item Taux d’utilisation des capacités :
+	\begin{itemize}
+		\item Véhicule 1 : 98,3 \%
+		\item Véhicule 2 : 85,5 \%
+		\item Véhicule 3 : 100 \%
+		\item Véhicule 4 : 77,8 \%
+	\end{itemize}
+\end{itemize}
+
+Une visualisation graphique des routes a été produite afin de faciliter l’interprétation spatiale de la solution.
+
+\subsection{Analyses argumentées des résultats obtenus}
+
+\subsubsection{Qualité de la solution}
+
+La solution obtenue est \textbf{optimale}, ce qui démontre que la modélisation CP-SAT est \textbf{correcte et complète}. Toutes les contraintes (demande, capacité, compatibilité produits/véhicules) sont respectées sans exception. L’amélioration significative par rapport à la solution heuristique initiale montre que :
+\begin{itemize}
+	\item l’heuristique joue efficacement son rôle de \textbf{point de départ}
+	\item le solveur CP-SAT exploite cette base pour explorer rapidement des solutions de meilleure qualité
+\end{itemize}
+
+\subsubsection{Performance du solveur OR-Tools CP-SAT}
+
+Le solveur atteint l’optimalité en moins de 6 secondes, bien en-dessous de la limite imposée (30 s). Cela met en évidence :
+\begin{itemize}
+	\item la robustesse du moteur CP-SAT
+	\item l’efficacité des stratégies internes (LNS, LP relaxation, local search, feasibility pump)
+\end{itemize}
+
+La diversité des sous-solveurs activés a permis une exploration rapide et équilibrée de l’espace de recherche.
+
+\subsubsection{Répartition des charges et routes}
+
+La charge est globalement bien répartie :
+
+\begin{itemize}
+	\item Aucun véhicule n’est sous-utilisé de manière critique
+	\item Un véhicule atteint même 100 \% de capacité, indiquant une bonne exploitation des ressources
+\end{itemize}
+
+Les routes restent relativement courtes (2 à 4 stations par véhicule), ce qui contribue à :
+
+\begin{itemize}
+	\item réduire les coûts
+	\item simplifier l’exécution opérationnelle
+\end{itemize}
+
+\section{Instance \textit{large}}
+
+L’instance large du problème MPVRP-CC correspond à un cas de grande taille, destiné à évaluer la robustesse de la modélisation ainsi que les performances du solveur OR-Tools CP-SAT dans un contexte fortement combinatoire.
+
+Pour le tester, on utilise la commande suivante :
+
+\begin{lstlisting}[language=bash]
+python solver.py instances/large.dat solution.dat
+\end{lstlisting}
+
+\subsection{Caractéristiques principales}
+
+\begin{itemize}
+	\item Stations : 20
+	\item Produits : 2
+	\item Véhicules : 6
+	\item Dépôts : 2
+	\item Garages : 3
+	\item Demande totale : 24 210 unités
+	\item Capacité totale des véhicules : 40 500 unités
+	\item Ratio demande/capacité : 0,60
+\end{itemize}
+
+Cette configuration garantit une faisabilité confortable du problème, avec une marge de capacité importante, tout en introduisant une complexité élevée due au nombre de stations, de véhicules et aux livraisons multi-produits.
+
+
+\subsection{Résolution avec OR-Tools CP-SAT}
+
+\begin{itemize}
+	\item Solveur : OR-Tools CP-SAT
+	\item Temps limite : 30 s
+	\item Temps effectif de résolution : 2,83 s
+	\item Temps total (modélisation + résolution) : 2,85 s
+	\item Statut final : OPTIMAL
+	\item Valeur de la fonction objectif : 45 772
+\end{itemize}
+
+Avant la résolution exacte, une solution heuristique initiale a été construite et injectée dans le solveur et son coût heuristique initial était : 123 836. La solution optimale finale représente une amélioration de 63,0 \% par rapport à cette solution de départ.
+
+
+\subsection{Résultats opérationnels}
+
+\begin{itemize}
+	\item 100 \% des demandes des stations sont satisfaites, pour l’ensemble des produits.
+	\item 5 routes générées, correspondant à 5 véhicules effectivement utilisés sur les 6 disponibles.
+	\item Taux d’utilisation des capacités :
+	\begin{itemize}
+		\item Véhicule 1 : 66,9 \%
+		\item Véhicule 2 : 38,6 \%
+		\item Véhicule 3 : 92,9 \%
+		\item Véhicule 5 : 99,8 \%
+		\item Véhicule 6 : 58,2 \%
+	\end{itemize}
+\end{itemize}
+
+Les routes desservent entre 1 et 6 stations, avec des livraisons mono-produit et multi-produits selon les stations. Une visualisation graphique des routes a été générée afin de faciliter l’analyse spatiale et la validation visuelle de la solution (\textit{visualisation\_large.png}).
+
+\subsection{Analyses argumentées des résultats obtenus}
+
+\subsubsection{Qualité de la solution}
+
+La solution obtenue est optimale, ce qui confirme la validité et la complétude de la modélisation CP-SAT du MPVRP-CC. Toutes les contraintes sont strictement respectées :
+\begin{itemize}
+	\item satisfaction exacte des demandes,
+	\item respect des capacités des véhicules,
+	\item cohérence entre visite d’une station et livraison effective,
+	\item prise en compte des coûts de changement de produit
+\end{itemize}
+
+L’amélioration significative par rapport à la solution heuristique initiale montre que :
+\begin{itemize}
+	\item l’heuristique joue efficacement son rôle de point de départ faisable,
+	\item le solveur CP-SAT exploite cette base pour réduire rapidement l’espace de recherche et atteindre une solution optimale.
+\end{itemize}
+
+\subsubsection{Performance du solveur OR-Tools CP-SAT}
+
+Le solveur atteint l’optimalité en moins de 3 secondes, largement en dessous de la limite imposée de 30 secondes. Cette performance met en évidence :
+\begin{itemize}
+	\item la robustesse du moteur CP-SAT face à une instance de grande taille,
+	\item l’efficacité des stratégies internes activées automatiquement, notamment :
+	\begin{itemize}
+		\item Large Neighborhood Search (LNS),		
+		\item relaxations linéaires (default\_lp),
+		\item feasibility pump,
+		\item recherche locale et redémarrages contrôlés.
+	\end{itemize}
+\end{itemize}
+
+La diversité des sous-solveurs a permis une exploration rapide, équilibrée et progressive de l’espace de recherche, comme l’illustre la succession de 37 solutions améliorantes avant l’optimalité.
+
+\subsubsection{Répartition des charges et routes}
+
+La répartition des charges n’est pas parfaitement équilibrée, mais reste cohérente d’un point de vue économique :
+\begin{itemize}
+	\item certains véhicules sont fortement exploités (jusqu’à \textbf{99,8 \%}),
+	\item d’autres sont moins sollicités lorsque cela permet de réduire le coût global.
+\end{itemize}
+
+Un véhicule n’est pas utilisé, ce qui indique que le solveur préfère minimiser les coûts plutôt que mobiliser inutilement toute la flotte disponible. Les routes restent de taille raisonnable (jusqu’à 6 stations par véhicule), ce qui contribue à :
+\begin{itemize}
+	\item limiter les distances et coûts cumulés,
+	\item conserver une exécution opérationnelle réaliste,
+	\item gérer efficacement les livraisons multi-produits.
+\end{itemize}

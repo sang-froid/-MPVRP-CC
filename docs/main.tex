@@ -1,0 +1,111 @@
+\documentclass[11pt,a4paper]{report}
+
+% encodage & langue
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+
+% graphisme / maths / utilitaires
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\graphicspath{{images/}} % dossier des images
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\tiny \leftmark}
+\fancyhead[R]{\scriptsize \rightmark}
+\fancyfoot[C]{\thepage}
+
+% style des titres de chapitre
+\usepackage[Lenny]{fncychap}
+
+% listes, tableaux, etc.
+\usepackage{tocloft}
+\setlength{\cftbeforechapskip}{6pt}
+
+% glossaire
+\usepackage[acronym,toc]{glossaries}
+\makeglossaries
+
+% commandes utiles
+\newcommand{\ReportTitle}{Multi-Product Vehicle Routing Problem with Changeover Cost}
+\newcommand{\University}{IFRI - UAC}
+\newcommand{\Year}{2025--2026}
+
+% =====================
+\begin{document}
+% =====================
+
+% ===== page de garde simple =====
+\begin{titlepage}
+  \begin{center}
+    {\Large \textbf{Rapport de projet -- Master}}\\[2em]
+
+    {\LARGE \textbf{\ReportTitle}}\\[2em]
+
+    {\large Présenté par :}\\[0.6em]
+    \begin{tabular}{ll}
+      Iréné A. S. F. LOKOSSOU     & 10\,\% \\
+      Juste D. TOSSOU             & 10\,\% \\
+      Méschac R. HOUESSOU         & 10\,\% \\
+      Samuel J. G. O. W. AKABASSI & 10\,\% \\
+      Mavic K. S. V. PATINVOH     & 10\,\% \\
+      Omella I. A. DADO           & 10\,\%
+    \end{tabular}
+
+    \vfill
+
+    Encadré par : Dr Ratheil V. HOUNDJI\\[1em]
+
+    \University\\[0.5em]
+    Année académique : \Year
+
+  \end{center}
+\end{titlepage}
+
+% ===== sommaire & préliminaires =====
+\pagenumbering{roman}
+\setcounter{tocdepth}{2}
+\tableofcontents
+\cleardoublepage
+
+% résumé
+\input{resume.tex}
+\cleardoublepage
+
+% listes
+\listoffigures
+\cleardoublepage
+\listoftables
+\cleardoublepage
+
+% sigles/glossaire (si utilisé)
+\printglossary[type=\acronymtype,title=Liste des acronymes,toctitle=Liste des acronymes]
+\cleardoublepage
+
+% ===== chapitres =====
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\include{introduction}
+\setcounter{chapter}{0}
+\include{presentation}
+\include{modelisation}
+\include{resolution}
+\include{conclusion}
+
+% ===== bibliographie =====
+\addcontentsline{toc}{chapter}{Bibliographie}
+\bibliographystyle{abbrv}
+\bibliography{biblio}
+
+\end{document}
